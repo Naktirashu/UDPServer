@@ -14,13 +14,19 @@ You will implement the client and server component of a transport layer. The cli
 A high-level overview of the system:
 File --> Sender <-- UDP --> Receiver --> File 
 In general, since you are using UDP, the implementation (both at the receiver and sender) should:
+
 --The receiver’s output should be identical to the other side's input, regardless of a lossy, congested, or corrupting network layer. You will ensure reliable transport by having the recipient acknowledge packets received from the sender; the sender will detect missing acknowledgements and resend the dropped or corrupted packets. 
+
 --Handle packet drops/delays
 The sender should resend a packet if the receiver does not acknowledge it within an appropriate time period.  You resend packet(s) whenever a sent packet has gone unacknowledged for the timeout period.  The  default  timeout period is  2000  msec,  but  you  may  change  this  with  the  -t  command-line option.
+
 --Handle packet reordering
-Your server and client should ensure that data is written in the correct order, even if the network layer reorders packets. 
+Your server and client should ensure that data is written in the correct order, even if the network layer reorders packets.
+
 --Detect and handle packet corruption using the Internet checksum algorithm 
+
 --Provide trivial flow control – based on the send window. You should support arbitrary window sizes. Allow multiple packets to be outstanding at any time. The window size may be supplied by the -w command-line  option.
+
 File formats that must transfer over can be of any type, e.g., .txt, .doc, .mov, .jpg, .exe, etc.
 Testing considerations:
 Because we are doing this between two processes on a single machine, latency is near 0, and no network faults can occur. As a result, you should introduce errors to test the correctness of your implementation. 
@@ -41,19 +47,33 @@ Your UI should provide enough information when you demo your project.
 You will be required to open two windows, one for the client and one for the server. 
 Both windows should present enough information to demonstrate the protocol in action. 
 The information provided in the sender’s window should include:
+
 --Packet sequence number of packet sent.
+
 --Packet (sequence number) that timed out
+
 --Packet that was re-transmitted.
+
 --All packets in the current window.
+
 --Acks received.
+
 --Which packets are damaged, i.e., deliberately trigger a checksum error on the receiver side.
+
 The information provided in the receiver’s window should include:
+
 --Packets (sequence number) received.
+
 --Damaged packet(s) (checksum error did not match)
+
 --corresponding damaged packet from sender window).
+
 --Packets in the current receiver window.
+
 --Packets (duplicated) that are discarded.
+
 --ACK packets that are sent.
+
 The receiver must re-sequence any out of order frames received.
 It is important that your console output can be slowed down to human time, and that you can explain the behavior of your software program as it reacts to dropped/corrupted packets.
 Implementation Details
@@ -66,9 +86,13 @@ public class Packet {
   int seqno ; 	//32-bit 4-byte Data packet Only
   byte data[500]; //0-500 bytes. Data packet only. Variable
 }
+
 --cksum:  2 byte IP  checksum. (optional)
+
 --len: 2 byte total length of the packet.
+
 o	For Ack packets this is 8: 2 for cksum, 2 for len, and 4 for ACK no
+
 o	For data packets, this is 12 + payload size: 2 for cksum, 2 for len, 4 for ackno, 4 for seqno, and as many bytes are there in data[] 
 
 Note: You must examine the length  field,  and should not assume that the UDP packet you receive is the correct length.  The network might truncate or pad packets.
@@ -77,9 +101,12 @@ ackno is the sequence number you are waiting for, that you have not received yet
 This says that the sender of a packet has received all packets with sequence numbers earlier than ackno,  and is waiting for the packet with a seqno of ackno. 
 The  first sequence number in any connection is 1, so if you have not received any packets yet, you should set ackno  to 1.
 The following  fields will not exist in an ACK packet: 
---seqno: Each packet transmitted in a stream of data must be numbered with a seqno.  The first packet in a stream has a seqno of 1.  This protocol numbers packets. 
+
+--seqno: Each packet transmitted in a stream of data must be numbered with a seqno.  The first packet in a stream has a seqno of 1.  This protocol numbers packets.
+
 --data:  Contains (len - 12) bytes of payload data for the application. 
 To conserve packets, a sender should not send more than one unacknowledged Data frame with less than the maximum number of bytes (500)
+
 Testing
 Test for interoperability with other students in the class. 
 Demonstration
@@ -87,9 +114,14 @@ You will be asked to demo your project. Hence, it is important to capture as muc
 There should be a separate area where all the necessary information is logged and printed on the screen. 
 Grading Criteria
 Implementation:
+
 -	stop and wait: 60%
+
 o	resends after timeout
+
 o	handle corrupt, delayed, reordered, and lost packets
+
 -	sliding window (Go Back-n): 40% 
+-	
 You will lose points:
 if you do not demonstrate your project to me:  40% penalty
