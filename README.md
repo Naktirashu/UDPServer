@@ -122,6 +122,6 @@ o	resends after timeout
 o	handle corrupt, delayed, reordered, and lost packets
 
 -	sliding window (Go Back-n): 40% 
--	
+
 You will lose points:
 if you do not demonstrate your project to me:  40% penalty
