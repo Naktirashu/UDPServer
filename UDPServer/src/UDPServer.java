@@ -55,6 +55,11 @@ public class UDPServer implements Runnable {
 				try {
 
 					socket.receive(incoming);
+					
+					//Prints the message that was sent from client, will need to change for File though
+					//FIXME
+					String s = new String(incoming.getData(),0,incoming.getLength(), "UTF-8");
+					System.out.println("From Client:" + s);
 
 					this.respond(socket, incoming);
 
