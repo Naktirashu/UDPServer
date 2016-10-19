@@ -23,9 +23,9 @@ public class ServerGui extends JFrame implements Observer{
 	private JTextField packetLossTextField;
 	private JTextArea feedBackArea;
 	private ScrollPane scrollPane;
-	private int tmpLength = 0;
 	
 	private int packetLossPercentage = 0;
+	
 
 	/**
 	 * Launch the application.
@@ -92,11 +92,7 @@ public class ServerGui extends JFrame implements Observer{
 	public JTextArea getFeedBackArea() {
 		return feedBackArea;
 	}
-	//Most likely change this to an Update method, like on client's GUI
-	public void setFeedBackArea(JTextArea feedBackArea) {
-		this.feedBackArea = feedBackArea;
-	}
-
+	
 	public JTextField getPacketLossTextField() {
 		return packetLossTextField;
 	}
@@ -107,14 +103,29 @@ public class ServerGui extends JFrame implements Observer{
 
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		//System.out.println("In update Method");
 		
 		//print the received message to the textArea
 		feedBackArea.append("Received from Client: " + arg1.toString() +"\n");
+		
+		//FIXME update this to include the packet number, tie it to the response somehow (for failure cases)
+		feedBackArea.append("Sending Ack to Client: \n");
+		
 		//Scrolls with the incoming new data
 		scrollPane.setScrollPosition(0,feedBackArea.getDocument().getLength());
 		
 		
 		
 	}
+
+	public int getPacketLossPercentage() {
+		//Do we want to have it grab from the textfield each time and delete the set button, or do we want to set it before sending, with a default of 0 failure?
+		//packetLossPercentage = Integer.parseInt(packetLossTextField.getText());
+		
+		return packetLossPercentage;
+	}
+
+	public void setPacketLossPercentage(int packetLossPercentage) {
+		this.packetLossPercentage = packetLossPercentage;
+	}
+
 }

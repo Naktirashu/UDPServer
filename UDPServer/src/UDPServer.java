@@ -8,7 +8,7 @@ import java.util.logging.*;
 
 public class UDPServer extends Observable implements Runnable {
 	
-	ServerGui serverGui;
+	static ServerGui serverGui;
 	private BlockingQueue<String> queue = new ArrayBlockingQueue<String>(50);
 
 
@@ -25,6 +25,9 @@ public class UDPServer extends Observable implements Runnable {
 
 
 	private String messageReceived;
+	
+	//maybe use this to have Math.random set this to true when its a failure then check this before sending response
+	private boolean failure = false;
 
 	
 	public UDPServer (int port) {
@@ -70,21 +73,38 @@ public class UDPServer extends Observable implements Runnable {
 
 					socket.receive(incoming);
 					
-					//Prints the message that was sent from client, will need to change for File though
-					//FIXME
-					String s = new String(incoming.getData(),0,incoming.getLength(), "UTF-8");
-					//System.out.println("From Client:" + s);
-					
-					try {
-						queue.put(s);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					//FIXME this may not be the best way to do it, but works.
+					Double failureGenerator = (Math.random()* 100);
+					System.out.println("failureGenerator= " + failureGenerator);
+					if(failureGenerator > serverGui.getPacketLossPercentage()){
+						failure = false;
+					}else{
+						failure = true;
 					}
 					
-					this.respond(socket, incoming);
 					
-					Thread.yield();
+					if(failure == true){
+						System.out.println("Failed to receive Packet: Caused by Failure Percentage Setting");
+					}else{
+						//Prints the message that was sent from client, will need to change for File though
+						//FIXME
+						String s = new String(incoming.getData(),0,incoming.getLength(), "UTF-8");
+						//System.out.println("From Client:" + s);
+						
+						try {
+							//Put the new message on the blockingQueue
+							queue.put(s);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						
+						this.respond(socket, incoming);
+						
+						Thread.yield();
+					}
+					
 					
 
 				} catch (SocketTimeoutException ex) {
@@ -127,21 +147,25 @@ public class UDPServer extends Observable implements Runnable {
 
 		UDPServer server = new UDPServer();
 		
-		ServerGui serverGui = new ServerGui();
+		serverGui = new ServerGui();
 		
+		//severGui observes the server
 		server.addObserver(serverGui);
 		
+		//Display GUI
 		serverGui.setVisible(true);
-		//server.run();
 
 		Thread t = new Thread(server);
 
+		//Start the server Thread
 		t.start();
 
 	}
 
 	public void setMessageReceived(String messageReceived) {
 		this.messageReceived = messageReceived;
+		
+		//We got new message, tell the Observers
 		setChanged();
 		notifyObservers(messageReceived);
 		
@@ -153,6 +177,14 @@ public class UDPServer extends Observable implements Runnable {
 
 	public void setQueue(BlockingQueue<String> queue) {
 		this.queue = queue;
+	}
+	
+	public boolean isFailure() {
+		return failure ;
+	}
+
+	public void setFailure(boolean failure) {
+		this.failure = failure;
 	}
 
 
