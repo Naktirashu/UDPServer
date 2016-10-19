@@ -1,20 +1,29 @@
 import java.io.*;
 
 import java.net.*;
-
+import java.util.Observable;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.*;
 
-public class UDPServer implements Runnable {
+public class UDPServer extends Observable implements Runnable {
+	
+	ServerGui serverGui;
+
 
 	public final static int DEFAULT_PORT = 7;
 
 	private final int bufferSize; // in bytes
 
 	private final int port;
+	
 
 	//private final Logger logger = Logger.getLogger(UDPServer.class.getCanonicalName());
 
 	private volatile boolean isShutDown = false;
+
+
+	private String messageReceived;
 
 	
 	public UDPServer (int port) {
@@ -60,8 +69,11 @@ public class UDPServer implements Runnable {
 					//FIXME
 					String s = new String(incoming.getData(),0,incoming.getLength(), "UTF-8");
 					System.out.println("From Client:" + s);
-
+					
 					this.respond(socket, incoming);
+					
+					Thread.yield();
+					
 
 				} catch (SocketTimeoutException ex) {
 
@@ -98,15 +110,29 @@ public class UDPServer implements Runnable {
 		socket.send(outgoing);
 
 	}
-
+	
 	public static void main(String[] args) {
 
 		UDPServer server = new UDPServer();
+		
+		ServerGui serverGui = new ServerGui();
+		
+		server.addObserver(serverGui);
+		
+		serverGui.setVisible(true);
+		//server.run();
 
 		Thread t = new Thread(server);
 
 		t.start();
 
+	}
+
+	public void setMessageReceived(String messageReceived) {
+		this.messageReceived = messageReceived;
+		setChanged();
+		notifyObservers(messageReceived);
+		
 	}
 
 }
