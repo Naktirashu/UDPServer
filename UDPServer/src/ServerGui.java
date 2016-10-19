@@ -5,6 +5,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
+
+
 import java.awt.ScrollPane;
 import java.util.Observable;
 import java.util.Observer;
@@ -21,6 +23,7 @@ public class ServerGui extends JFrame implements Observer{
 	private JTextField packetLossTextField;
 	private JTextArea feedBackArea;
 	private ScrollPane scrollPane;
+	private int tmpLength = 0;
 	
 	private int packetLossPercentage = 0;
 
@@ -54,7 +57,7 @@ public class ServerGui extends JFrame implements Observer{
 		feedBackArea = new JTextArea();
 		feedBackArea.setBounds(10, 229, 568, 328);
 		
-		ScrollPane scrollPane = new ScrollPane();
+		scrollPane = new ScrollPane();
 		scrollPane.setBounds(10, 94, 417, 395);
 		scrollPane.add(feedBackArea);
 		contentPane.add(scrollPane);
@@ -104,11 +107,14 @@ public class ServerGui extends JFrame implements Observer{
 
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		System.out.println("In update Method");
+		//System.out.println("In update Method");
+		
 		//print the received message to the textArea
 		feedBackArea.append("Received from Client: " + arg1.toString() +"\n");
 		//Scrolls with the incoming new data
 		scrollPane.setScrollPosition(0,feedBackArea.getDocument().getLength());
+		
+		
 		
 	}
 }

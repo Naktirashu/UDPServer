@@ -9,6 +9,7 @@ import java.util.logging.*;
 public class UDPServer extends Observable implements Runnable {
 	
 	ServerGui serverGui;
+	private BlockingQueue<String> queue = new ArrayBlockingQueue<String>(50);
 
 
 	public final static int DEFAULT_PORT = 7;
@@ -54,6 +55,10 @@ public class UDPServer extends Observable implements Runnable {
 		try (DatagramSocket socket = new DatagramSocket(port)) {
 
 			socket.setSoTimeout(10000); // check every 10 seconds for shutdown
+			
+			MessageHandlerThread messageThread = new MessageHandlerThread(this);
+			messageThread.start();
+			
 
 			while (true) {
 
@@ -68,7 +73,14 @@ public class UDPServer extends Observable implements Runnable {
 					//Prints the message that was sent from client, will need to change for File though
 					//FIXME
 					String s = new String(incoming.getData(),0,incoming.getLength(), "UTF-8");
-					System.out.println("From Client:" + s);
+					//System.out.println("From Client:" + s);
+					
+					try {
+						queue.put(s);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					
 					this.respond(socket, incoming);
 					
@@ -134,5 +146,14 @@ public class UDPServer extends Observable implements Runnable {
 		notifyObservers(messageReceived);
 		
 	}
+
+	public BlockingQueue<String> getQueue() {
+		return queue;
+	}
+
+	public void setQueue(BlockingQueue<String> queue) {
+		this.queue = queue;
+	}
+
 
 }
